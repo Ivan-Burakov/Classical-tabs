@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Табы для гитары</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px 0 0 8px;
+            font-size: 16px;
+        }
+
+        .search-box button {
+            padding: 10px 20px;
+            background: #212529;
+            color: white;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+        }
+
+        .tabs-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .tab-item {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .tab-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .tab-item.active {
+            background-color: #e9ecef;
+        }
+
+        .tab-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .tab-artist {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .stars {
+            color: #ffc107;
+            margin-right: 8px;
+        }
+
+        .rating-count {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .tab-content {
+            min-height: 500px;
+        }
+
+        .tab-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .tab-details {
+            flex: 1;
+        }
+
+        .tab-content h2 {
+            margin-bottom: 5px;
+        }
+
+        .tab-content .artist {
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .tab-text {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-family: monospace;
+            white-space: pre-wrap;
+            line-height: 1.4;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .rate-tab {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .rate-tab select {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+
+        .rate-tab button {
+            padding: 8px 16px;
+            background: #212529;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .add-tab-form {
+            display: grid;
+            gap: 15px;
+        }
+
+        .add-tab-form input,
+        .add-tab-form textarea {
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .add-tab-form textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .add-tab-form button {
+            padding: 12px 20px;
+            background: #212529;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-tab.active {
+            border-bottom: 2px solid #212529;
+            font-weight: 500;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Табы для гитары</h1>
+        <p>База данных гитарных табулатур</p>
+    </header>
+
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="browse">Просмотр табов</div>
+        <div class="nav-tab" data-tab="add">Добавить таб</div>
+    </div>
+
+    <div class="tab-panel active" id="browse-panel">
+        <div class="container">
+            <div class="sidebar">
+                <div class="card">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Поиск по названию или исполнителю...">
+                        <button id="search-button">Найти</button>
+                    </div>
+                    <div class="tabs-list" id="tabs-list">
+                        <!-- Список табов будет загружен здесь -->
+                    </div>
+                </div>
+            </div>
+            <div class="main-content">
+                <div class="card tab-content" id="tab-content">
+                    <div class="empty-state">
+                        <p>Выберите таб из списка для просмотра</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-panel" id="add-panel">
+        <div class="card">
+            <h2>Добавить новый таб</h2>
+            <form class="add-tab-form" id="add-tab-form">
+                <input type="text" id="tab-title" placeholder="Название композиции" required>
+                <input type="text" id="tab-artist" placeholder="Исполнитель" required>
+                <textarea id="tab-content-text" placeholder="Введите текст табулатуры..." required></textarea>
+                <button type="submit">Опубликовать таб</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Имитация базы данных с использованием localStorage
+        const STORAGE_KEY = 'guitarTabs';
+
+        // Функция для получения всех табов из хранилища
+        function getTabs() {
+            const tabsJSON = localStorage.getItem(STORAGE_KEY);
+            return tabsJSON ? JSON.parse(tabsJSON) : [];
+        }
+
+        // Функция для сохранения табов в хранилище
+        function saveTabs(tabs) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tabs));
+        }
+
+        // Инициализация базы данных с примерами, если она пуста
+        function initDatabase() {
+            const tabs = getTabs();
+            if (tabs.length === 0) {
+                const initialTabs = [
+                    {
+                        id: 1,
+                        title: "Nothing Else Matters",
+                        artist: "Metallica",
+                        content: "e|-------0-------0-------0-------0-------|\nB|-----1-----1-----1-----1-----1-----1---|\nG|---0-----0-----0-----0-----0-----0-----|\nD|---------------------------------------|\nA|---------------------------------------|\nE|-3-----3-----3-----3-----3-----3-------|",
+                        rating: 4.5,
+                        votes: 12
+                    },
+                    {
+                        id: 2,
+                        title: "Wish You Were Here",
+                        artist: "Pink Floyd",
+                        content: "e|-------0-------0-------0-------0-------|\nB|-----0-----0-----0-----0-----0-----0---|\nG|---1-----1-----1-----1-----1-----1-----|\nD|-2-----2-----2-----2-----2-----2-------|\nA|---------------------------------------|\nE|---------------------------------------|",
+                        rating: 4.7,
+                        votes: 18
+                    },
+                    {
+                        id: 3,
+                        title: "Stairway to Heaven",
+                        artist: "Led Zeppelin",
+                        content: "e|-------5-------7-------8-------7-------|\nB|-----5-----5-----5-----5-----5-----5---|\nG|---5-----5-----5-----5-----5-----5-----|\nD|---------------------------------------|\nA|---------------------------------------|\nE|---------------------------------------|",
+                        rating: 4.9,
+                        votes: 25
+                    }
+                ];
+                saveTabs(initialTabs);
+            }
+        }
+
+        // Функция для отображения списка табов
+        function renderTabsList(tabs = null) {
+            const tabsList = document.getElementById('tabs-list');
+            const tabsToRender = tabs || getTabs();
+            
+            if (tabsToRender.length === 0) {
+                tabsList.innerHTML = '<div class="empty-state"><p>Табы не найдены</p></div>';
+                return;
+            }
+            
+            tabsList.innerHTML = tabsToRender.map(tab => `
+                <div class="tab-item" data-id="${tab.id}">
+                    <div class="tab-title">${tab.title}</div>
+                    <div class="tab-artist">${tab.artist}</div>
+                    <div class="rating">
+                        <div class="stars">${renderStars(tab.rating)}</div>
+                        <div class="rating-count">${tab.rating.toFixed(1)} (${tab.votes})</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Добавляем обработчики событий для элементов списка
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const tabId = parseInt(this.getAttribute('data-id'));
+                    displayTab(tabId);
+                    
+                    // Убираем активный класс у всех элементов и добавляем текущему
+                    document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        // Функция для отображения звезд рейтинга
+        function renderStars(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+            
+            return '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
+        }
+
+        // Функция для отображения выбранного таба
+        function displayTab(tabId) {
+            const tabs = getTabs();
+            const tab = tabs.find(t => t.id === tabId);
+            
+            if (!tab) return;
+            
+            const tabContent = document.getElementById('tab-content');
+            tabContent.innerHTML = `
+                <div class="tab-header">
+                    <div class="tab-details">
+                        <h2>${tab.title}</h2>
+                        <div class="artist">${tab.artist}</div>
+                    </div>
+                </div>
+                <div class="tab-text">${tab.content}</div>
+                <div class="rate-tab">
+                    <select id="rating-select">
+                        <option value="5">5 ★</option>
+                        <option value="4">4 ★</option>
+                        <option value="3">3 ★</option>
+                        <option value="2">2 ★</option>
+                        <option value="1">1 ★</option>
+                    </select>
+                    <button id="rate-button" data-id="${tab.id}">Оценить</button>
+                </div>
+            `;
+            
+            // Добавляем обработчик для кнопки оценки
+            document.getElementById('rate-button').addEventListener('click', function() {
+                const ratingValue = parseInt(document.getElementById('rating-select').value);
+                rateTab(tabId, ratingValue);
+            });
+        }
+
+        // Функция для оценки таба
+        function rateTab(tabId, rating) {
+            const tabs = getTabs();
+            const tabIndex = tabs.findIndex(t => t.id === tabId);
+            
+            if (tabIndex === -1) return;
+            
+            // Обновляем рейтинг
+            const currentRating = tabs[tabIndex].rating;
+            const currentVotes = tabs[tabIndex].votes;
+            const newRating = (currentRating * currentVotes + rating) / (currentVotes + 1);
+            
+            tabs[tabIndex].rating = newRating;
+            tabs[tabIndex].votes = currentVotes + 1;
+            
+            saveTabs(tabs);
+            renderTabsList();
+            displayTab(tabId); // Обновляем отображение таба с новым рейтингом
+            
+            alert('Спасибо за вашу оценку!');
+        }
+
+        // Функция для поиска табов
+        function searchTabs(query) {
+            const tabs = getTabs();
+            if (!query.trim()) {
+                return tabs;
+            }
+            
+            const lowerQuery = query.toLowerCase();
+            return tabs.filter(tab => 
+                tab.title.toLowerCase().includes(lowerQuery) || 
+                tab.artist.toLowerCase().includes(lowerQuery)
+            );
+        }
+
+        // Функция для добавления нового таба
+        function addNewTab(title, artist, content) {
+            const tabs = getTabs();
+            
+            // Находим максимальный ID для создания нового
+            const maxId = tabs.length > 0 ? Math.max(...tabs.map(t => t.id)) : 0;
+            
+            const newTab = {
+                id: maxId + 1,
+                title,
+                artist,
+                content,
+                rating: 0,
+                votes: 0
+            };
+            
+            tabs.push(newTab);
+            saveTabs(tabs);
+            
+            // Переключаемся на вкладку просмотра и показываем новый таб
+            switchTab('browse');
+            renderTabsList();
+            displayTab(newTab.id);
+            
+            // Выделяем новый таб в списке
+            setTimeout(() => {
+                const newTabElement = document.querySelector(`.tab-item[data-id="${newTab.id}"]`);
+                if (newTabElement) {
+                    document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+                    newTabElement.classList.add('active');
+                }
+            }, 100);
+        }
+
+        // Функция для переключения между вкладками
+        function switchTab(tabName) {
+            // Убираем активный класс у всех вкладок и панелей
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            
+            // Добавляем активный класс выбранной вкладке и панели
+            document.querySelector(`.nav-tab[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(`${tabName}-panel`).classList.add('active');
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализируем базу данных
+            initDatabase();
+            
+            // Отображаем список табов
+            renderTabsList();
+            
+            // Обработчик для поиска
+            document.getElementById('search-button').addEventListener('click', function() {
+                const query = document.getElementById('search-input').value;
+                const results = searchTabs(query);
+                renderTabsList(results);
+            });
+            
+            // Обработчик для поиска при нажатии Enter
+            document.getElementById('search-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const query = this.value;
+                    const results = searchTabs(query);
+                    renderTabsList(results);
+                }
+            });
+            
+            // Обработчик для формы добавления таба
+            document.getElementById('add-tab-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const title = document.getElementById('tab-title').value;
+                const artist = document.getElementById('tab-artist').value;
+                const content = document.getElementById('tab-content-text').value;
+                
+                if (title && artist && content) {
+                    addNewTab(title, artist, content);
+                    
+                    // Очищаем форму
+                    this.reset();
+                }
+            });
+            
+            // Обработчики для переключения вкладок
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
